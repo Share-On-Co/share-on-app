@@ -6,18 +6,27 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
-export default function LoginScreen({ setLoggedIn }) {
+export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleGoogleLoginPress = async () => {
-    // 
+    return;
   };
+
+  useEffect(() => {
+    const checkLoggedIn = async () => { 
+    const loggedIn = await AsyncStorage.getItem('loggedIn');
+    if (loggedIn === 'true') {
+      navigation.navigate('chat');
+    }
+  }
+  checkLoggedIn();
+  }, []);
 
   const handleLoginPress = async () => {
     // make a GET request to https://mongodb-vercel-app.vercel.app/api/auth/login
-    const response = await fetch(`https://mongodb-rag-vercel-inquiry-share-onorg-share-ons-projects.vercel.app/api/auth/login?username=${email}&password=${password}`, {
+    const response = await fetch(`https://mongodb-rag-vercel-inquiry-share-onorg-share-ons-projects.vercel.app/api/auth/login/?username=${email}&password=${password}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -26,17 +35,7 @@ export default function LoginScreen({ setLoggedIn }) {
     });
     const user = await response.json();
     const id = user.id;
-    if (response.status !== 200) {
-      alert('Invalid username or password');
-      return;
-    }
-    else {
-      await AsyncStorage.setItem('userId', `${id}`);
-      setLoggedIn(true);
-    }
-
-    // console.log(users);
-    //
+    navigation.navigate('chat', { id: id });
   }
 
   return (
@@ -46,7 +45,7 @@ export default function LoginScreen({ setLoggedIn }) {
           <View style={styles.innerContainer}>
             <Image
               style={styles.logo}
-              source={require('../../assets/images/logo.png')}
+              source={require('../../assets/images/shareon.jpeg')}
             />
             <Text style={styles.title}>Share-On</Text>
             <Text style={styles.subtitle}>empowering teen mental health with AI</Text>
@@ -79,7 +78,7 @@ export default function LoginScreen({ setLoggedIn }) {
               <TouchableOpacity onPress={handleLoginPress} style={styles.loginButton}>
                 <Text style={styles.loginButtonText}>Login</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.navigate("auth/register")}>
+              <TouchableOpacity onPress={() => navigation.navigate("auth/register")}> 
                 <Text style={styles.registerText}>Don't have an account?</Text>
               </TouchableOpacity>
               <View style={styles.dividerContainer}>
@@ -115,9 +114,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    marginBottom: height * 0.05,
-    width: width * 0.5,
-    height: height * 0.1,
+    marginBottom: height * 0.02,
+    width: width,
+    height: height * 0.15,
     resizeMode: 'contain',
   },
   title: {

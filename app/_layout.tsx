@@ -16,7 +16,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-const Stack = createStackNavigator();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -25,32 +24,31 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+  const Stack = createStackNavigator();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (loggedIn) {
-        await AsyncStorage.setItem('loggedIn', 'true');
+  const fetchData = async () => {
+    if (loggedIn) {
+      await AsyncStorage.setItem('loggedIn', 'true');
+      setLoggedIn(true);
+    }
+    else {
+      const value = await AsyncStorage.getItem('loggedIn');
+      if (value === 'true') {
         setLoggedIn(true);
       }
       else {
-        const value = await AsyncStorage.getItem('loggedIn');
-        if (value === 'true') {
-          setLoggedIn(true);
-        }
-        else {
-          setLoggedIn(false);
-        }
+        setLoggedIn(false);
       }
-    };
-  
+    }
+  };
+
+  useEffect(() => {
     fetchData();
-  
-    return () => {
-      // Cleanup logic here
-    };
   }, []);
 
   useEffect(() => {
+
+    fetchData();
     if (loaded) {
       SplashScreen.hideAsync();
     }
@@ -62,23 +60,22 @@ export default function RootLayout() {
 
   return (
       <Stack.Navigator
+        initialRouteName={loggedIn ? 'chat' : 'auth/login'}
         screenOptions={{
           headerShown: false,
           gestureEnabled: true,
           ...TransitionPresets.ModalSlideFromBottomIOS,
-          headerBackTitle: ''
+          headerBackTitle: '',
+          
         }}>
-          { loggedIn ? (
-            <Stack.Screen name="chat" component={ChatbotScreen} />
-          ) : (
             <Stack.Group>
-            <Stack.Screen name="auth/login" component={() => <LoginScreen setLoggedIn={setLoggedIn}/>} />
-            <Stack.Group screenOptions={{presentation: 'modal'}}>
-              <Stack.Screen name="auth/register" component={Register} options={{headerShown: true, headerTransparent: true, headerTitle: ''}}/>
+              <Stack.Screen name="auth/login" component={LoginScreen} />
+              <Stack.Screen name="chat" component={ChatbotScreen} />
+              <Stack.Group screenOptions={{presentation: 'modal'}}>
+                <Stack.Screen name="auth/register" component={Register} options={{headerShown: true, headerTransparent: true, headerTitle: ''}}/>
+              </Stack.Group>
             </Stack.Group>
-            <Stack.Screen name="chat" component={ChatbotScreen} />
-          </Stack.Group>
-          )}
+
       </Stack.Navigator>
   );
 }

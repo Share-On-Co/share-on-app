@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, useWindowDimensions } from 'react-native';
 import { Button, Dialog, PaperProvider, Portal } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -18,12 +18,14 @@ const ChatbotScreen = ({ route, navigation }) => {
 
   const hideDialog = () => setVisible(false);
 
+  let userId = route.params?.id;
+
   const getResponse = async () => {
     const requestBody = {
       messages: messages.map((message) => ({ content: message.text })),
     };
 
-    const response = await fetch(`https://mongodb-rag-vercel-inquiry-share-onorg-share-ons-projects.vercel.app/api/chat`, {
+    const response = await fetch(`https://mongodb-rag-vercel-inquiry-share-onorg-share-ons-projects.vercel.app/api/chat/`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -34,7 +36,7 @@ const ChatbotScreen = ({ route, navigation }) => {
       reactNative: { textStreaming: true },
     });
 
-    const reader = response.body.getReader();
+    const reader = response.body?.getReader();
     const decoder = new TextDecoder();
 
     let botMessage = '';
@@ -62,8 +64,12 @@ const ChatbotScreen = ({ route, navigation }) => {
 
     await processStream();
   };
-
+  const storeData = async () => {
+    await AsyncStorage.setItem('userId', `${userId}`);
+  }
   useEffect(() => {
+
+    storeData();
     if (messages.length > 1 && messages[messages.length - 1].sender === 'user') {
       getResponse();
     }
@@ -78,10 +84,9 @@ const ChatbotScreen = ({ route, navigation }) => {
   const handleMatch = async () => {
     setLoading(true); // Set loading to true when the button is clicked
     try {
-      let userId = await AsyncStorage.getItem('userId');
       let numberId = parseInt(userId ?? '0');
       console.log(numberId);
-      const response = await fetch(`https://mongodb-rag-vercel-inquiry-share-onorg-share-ons-projects.vercel.app/api/match?id=${numberId}`, {
+      const response = await fetch(`https://mongodb-rag-vercel-inquiry-share-onorg-share-ons-projects.vercel.app/api/match/?id=${numberId}`, {
           method: 'GET',
           headers: {
               'Accept': 'application/json',
@@ -123,6 +128,9 @@ const ChatbotScreen = ({ route, navigation }) => {
     </View>
   );
 
+  const { height: screenHeight } = useWindowDimensions();
+  const keyboardVerticalOffset = screenHeight * 0.2; // Adjust this multiplier based on your design needs
+
   return (
     <PaperProvider>
     <SafeAreaView style={styles.container}>
@@ -152,17 +160,19 @@ const ChatbotScreen = ({ route, navigation }) => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.chatContainer}
         />
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            value={inputText}
-            onChangeText={setInputText}
-            placeholder="Type a message..."
-          />
-          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-            <Text style={styles.sendButtonText}>Send</Text>
-          </TouchableOpacity>
-        </View>
+        <KeyboardAvoidingView behavior={'position'} keyboardVerticalOffset={20}>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              value={inputText}
+              onChangeText={setInputText}
+              placeholder="Type a message..."
+            />
+            <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+              <Text style={styles.sendButtonText}>Send</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </SafeAreaView>
     </PaperProvider>
@@ -199,7 +209,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    backgroundColor: '#ffffff',
   },
   input: {
     flex: 1,
