@@ -1,25 +1,27 @@
 {
   "expo": {
-    "name": "share-on-app",
-    "slug": "share-on-app",
+    "name": "Share-OnOXpWEf8nAgk7ZYVqqfFiyIG7oFfVZcCrU64hWn5xp4tQ9LkV4bTIa5rD0KANpKNA",
+    "slug": "shareon",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/app.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/app.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mmortada.shareon"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/app.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.shareon.app"
     },
     "web": {
       "bundler": "metro",
@@ -27,10 +29,20 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "@prisma/react-native"
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "6e52627f-a084-4657-8aa4-d2a2abed8850"
+      }
+    },
+    "owner": "mmortada685"
   }
 }
